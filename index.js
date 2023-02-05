@@ -3,6 +3,8 @@ const app= express();
 const dotenv=require('dotenv');
 const port = process.env.PORT || 3000;
 const mongoose=require('mongoose');
+const favicon = require('serve-favicon');
+const path = require('path');
 
 //IMPORT ROUTES
 const authRoute=require('./routes/auth');
@@ -24,6 +26,9 @@ catch (error) {
 
 //MIDDLEWARES
 app.use(express.json());
+
+app.use(express.static('./public'))
+app.use(favicon(path.join(__dirname, '../public', 'favicon.ico')));
 
 // ROUTE MIDDLESWARES
 app.use('/api/user',authRoute);
