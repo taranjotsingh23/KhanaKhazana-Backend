@@ -9,6 +9,7 @@ const authRoute=require('./routes/auth');
 const filesRoute=require('./routes/files');
 const findResRoute=require('./routes/findRes');
 const orderDoneRoute=require('./routes/orderDone');
+const downloadRoute=require('./routes/download');
 const postRoute=require('./routes/posts');
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use('/api/user',authRoute);
 app.use('/api',filesRoute);
 app.use('/api/ngo',findResRoute);
 app.use('/api/res',orderDoneRoute);
+app.use('/files/download',downloadRoute);
 app.use('/api/posts',postRoute);
 
 app.listen(port,() => {
