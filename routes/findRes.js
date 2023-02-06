@@ -23,10 +23,9 @@ router.post("/findRes", async (req, res) => {
     }
 
     let obj={};
-    let z=0;
+    let z=1;
     for(let j=0;j<arr.length;j++)
     {
-        z=j;
         let found=await file.findOne({ resId: arr[j], orderStatus: "Pending", currDate: currentDate });
         if(found)
         {
@@ -46,7 +45,8 @@ router.post("/findRes", async (req, res) => {
             delete k.createdAt;
             delete k.updatedAt;
             delete k.__v;
-            obj[++z] = k;
+            obj[z] = k;
+            z++;
         }
     }
     return res.send(obj);
