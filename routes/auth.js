@@ -101,44 +101,62 @@ router.post("/signup", async (req, res) => {
       );
     }
 
-    try {
-      var otp = random();
-      new SibApiV3Sdk.TransactionalEmailsApi()
-        .sendTransacEmail({
-          subject: "OTP for Verify",
-          sender: { email: "api@sendinblue.com", name: "Khana Khazana" },
-          replyTo: { email: "api@sendinblue.com", name: "Khana Khazana" },
-          to: [{ name: user.ngoName, email: user.ngoEmail }],
-          htmlContent:
-            "<html><body><h1>Your One time password is  " +
-            otp +
-            " {{params.bodyMessage}}</h1></body></html>",
-          params: { bodyMessage: "   It is valid for 10 mins." },
-        })
-        .then(
-          async function (data) {
-            createdAt = Date.now();
-            expAt = Date.now() + 360000;
-            res
-              .status(200)
-              .send({
-                resCode: 200,
-                message: "OTP sent on Email",
-                name: user.ngoName,
-                email: user.ngoEmail,
-              });
-            const updated_otp = await ngoUser.findOneAndUpdate(
-              { ngoEmail: user.ngoEmail },
-              { otp: otp }
-            );
-          },
-          function (error) {
-            console.error(error);
-          }
-        );
-    } catch (err) {
-      res.status(400).send({ resCode: 400, message: err, name: "", email: "" });
-    }
+    var collection = db.collection("ngousers");
+    var email = req.body.email;
+    //Create and assign a token
+    const token = jwt.sign({ _id: ngoUser._id }, process.env.TOKEN_SECRET);
+    res.header("auth-token", token);
+    collection.updateOne({ ngoEmail: email }, { $set: { authToken: token } });
+    var dbObject = await ngoUser.findOne({ ngoEmail: email });
+    var newuserId=dbObject._id.toString();
+    var ngoId=newuserId.substring(0,24);
+    res
+      .status(200)
+      .send({
+        resCode: 200,
+        message: "User Successfully Registered",
+        authToken: token,
+        userId: ngoId
+      });
+
+    // try {
+    //   var otp = random();
+    //   new SibApiV3Sdk.TransactionalEmailsApi()
+    //     .sendTransacEmail({
+    //       subject: "OTP for Verify",
+    //       sender: { email: "api@sendinblue.com", name: "Khana Khazana" },
+    //       replyTo: { email: "api@sendinblue.com", name: "Khana Khazana" },
+    //       to: [{ name: user.ngoName, email: user.ngoEmail }],
+    //       htmlContent:
+    //         "<html><body><h1>Your One time password is  " +
+    //         otp +
+    //         " {{params.bodyMessage}}</h1></body></html>",
+    //       params: { bodyMessage: "   It is valid for 10 mins." },
+    //     })
+    //     .then(
+    //       async function (data) {
+    //         createdAt = Date.now();
+    //         expAt = Date.now() + 360000;
+    //         res
+    //           .status(200)
+    //           .send({
+    //             resCode: 200,
+    //             message: "OTP sent on Email",
+    //             name: user.ngoName,
+    //             email: user.ngoEmail,
+    //           });
+    //         const updated_otp = await ngoUser.findOneAndUpdate(
+    //           { ngoEmail: user.ngoEmail },
+    //           { otp: otp }
+    //         );
+    //       },
+    //       function (error) {
+    //         console.error(error);
+    //       }
+    //     );
+    // } catch (err) {
+    //   res.status(400).send({ resCode: 400, message: err, name: "", email: "" });
+    // }
   }
   else
   {
@@ -186,44 +204,63 @@ router.post("/signup", async (req, res) => {
       );
     }
 
-    try {
-      var otp = random();
-      new SibApiV3Sdk.TransactionalEmailsApi()
-        .sendTransacEmail({
-          subject: "OTP for Verify",
-          sender: { email: "api@sendinblue.com", name: "Khana Khazana" },
-          replyTo: { email: "api@sendinblue.com", name: "Khana Khazana" },
-          to: [{ name: user.resName, email: user.resEmail }],
-          htmlContent:
-            "<html><body><h1>Your One time password is  " +
-            otp +
-            " {{params.bodyMessage}}</h1></body></html>",
-          params: { bodyMessage: "   It is valid for 10 mins." },
-        })
-        .then(
-          async function (data) {
-            createdAt = Date.now();
-            expAt = Date.now() + 360000;
-            res
-              .status(200)
-              .send({
-                resCode: 200,
-                message: "OTP sent on Email",
-                name: user.resName,
-                email: user.resEmail,
-              });
-            const updated_otp = await resUser.findOneAndUpdate(
-              { resEmail: user.resEmail },
-              { otp: otp }
-            );
-          },
-          function (error) {
-            console.error(error);
-          }
-        );
-    } catch (err) {
-      res.status(400).send({ resCode: 400, message: err, name: "", email: "" });
-    }
+      var collection = db.collection("resusers");
+      var email = req.body.email;
+
+      //Create and assign a token
+      const token = jwt.sign({ _id: resUser._id }, process.env.TOKEN_SECRET);
+      res.header("auth-token", token);
+      collection.updateOne({ resEmail: email }, { $set: { authToken: token } });
+      var dbObject = await resUser.findOne({ resEmail: email });
+      var newuserId=dbObject._id.toString();
+      var resId=newuserId.substring(0,24);
+      res
+        .status(200)
+        .send({
+          resCode: 200,
+          message: "User Successfully Registered",
+          authToken: token,
+          userId: resId
+        });
+
+    // try {
+    //   var otp = random();
+    //   new SibApiV3Sdk.TransactionalEmailsApi()
+    //     .sendTransacEmail({
+    //       subject: "OTP for Verify",
+    //       sender: { email: "api@sendinblue.com", name: "Khana Khazana" },
+    //       replyTo: { email: "api@sendinblue.com", name: "Khana Khazana" },
+    //       to: [{ name: user.resName, email: user.resEmail }],
+    //       htmlContent:
+    //         "<html><body><h1>Your One time password is  " +
+    //         otp +
+    //         " {{params.bodyMessage}}</h1></body></html>",
+    //       params: { bodyMessage: "   It is valid for 10 mins." },
+    //     })
+    //     .then(
+    //       async function (data) {
+    //         createdAt = Date.now();
+    //         expAt = Date.now() + 360000;
+    //         res
+    //           .status(200)
+    //           .send({
+    //             resCode: 200,
+    //             message: "OTP sent on Email",
+    //             name: user.resName,
+    //             email: user.resEmail,
+    //           });
+    //         const updated_otp = await resUser.findOneAndUpdate(
+    //           { resEmail: user.resEmail },
+    //           { otp: 1 }
+    //         );
+    //       },
+    //       function (error) {
+    //         console.error(error);
+    //       }
+    //     );
+    // } catch (err) {
+    //   res.status(400).send({ resCode: 400, message: err, name: "", email: "" });
+    // }
   }
 
 });

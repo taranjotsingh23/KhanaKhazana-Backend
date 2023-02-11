@@ -49,7 +49,7 @@ const resUserSchema= new mongoose.Schema({
     },
     otp: {
         type: Number,
-        default: 0
+        default: 1
     },
     authToken: {
         type: String,
