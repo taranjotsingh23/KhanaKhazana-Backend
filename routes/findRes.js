@@ -40,6 +40,7 @@ router.post("/findRes", async (req, res) => {
             k.resMobileNumber=resDeepInfoFinding.resMobileNumber;
             k.resAddress=resDeepInfoFinding.resAddress;
             k.resArea=resDeepInfoFinding.resArea;
+            k.stars=resDeepInfoFinding.stars;
             k.fileLink= `${process.env.APP_BASE_URL}/files/download/${k.uuid}`;
             delete k._id; 
             delete k.createdAt;

@@ -47,6 +47,7 @@ router.post('/files', (req, res) => {
             path: req.file.path,
             size: req.file.size,
             foodQuantity: req.body.foodQuantity,
+            foodType: req.body.foodType,
             orderStatus: "Pending",
             currDate: currentDate,
         })

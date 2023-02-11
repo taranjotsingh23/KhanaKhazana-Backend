@@ -8,6 +8,7 @@ const fileSchema = new Schema({
     size: { type: Number, required: true },
     uuid: { type: String, required: true },
     foodQuantity: { type: Number, required: true },
+    foodType: { type: String, required: true },
     orderStatus: { type: String, required: true },
     currDate: { type: String, required: true },
 

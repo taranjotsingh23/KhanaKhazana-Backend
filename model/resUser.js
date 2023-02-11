@@ -36,6 +36,11 @@ const resUserSchema= new mongoose.Schema({
         min: 6,
         max: 255
     },
+    stars: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     password: {
         type: String,
         required: true,
