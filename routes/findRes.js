@@ -5,16 +5,6 @@ const resUser = require("../model/resUser");
 router.post("/findRes", async (req, res) => {
     var area=req.body.area;
 
-    //Forming Current Date
-    const date = new Date();
-    let day = date.getDate();
-    let month = date.getMonth() + 1;
-    let year = date.getFullYear();
-
-    // This arrangement can be altered based on how we want the date's format to appear.
-    let currentDate = `${day}-${month}-${year}`;
-    // console.log(currentDate); // "17-6-2022"
-
     const dbFinding = await resUser.find({ resArea: area });
     let arr=[];
     for(let i=0;i<dbFinding.length;i++)
@@ -26,7 +16,7 @@ router.post("/findRes", async (req, res) => {
     let z=1;
     for(let j=0;j<arr.length;j++)
     {
-        let found=await file.findOne({ resId: arr[j], orderStatus: "Pending", currDate: currentDate });
+        let found=await file.findOne({ resId: arr[j], orderStatus: "Pending" });
         if(found)
         {
             let resDeepInfoFinding= await resUser.findOne({ resId: arr[j] });

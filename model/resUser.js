@@ -47,10 +47,6 @@ const resUserSchema= new mongoose.Schema({
         max: 1024,
         min: 6
     },
-    otp: {
-        type: Number,
-        default: 1
-    },
     authToken: {
         type: String,
         required: true
