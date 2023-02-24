@@ -9,7 +9,7 @@ const jwt = require("jsonwebtoken");
 
 const cors = require("cors");
 router.use(cors({
-  origin: "*",
+  'Access-Control-Allow-Origin':'*'
 }));
 
 const {
