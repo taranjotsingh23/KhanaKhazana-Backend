@@ -30,7 +30,7 @@ catch (error) {
 app.use(express.json());
 
 var corsOptions = {
-  origin: "http://localhost:3000"
+  origin: "https://khana-khazana-nine.vercel.app"
 };
 
 app.use(cors(corsOptions));
