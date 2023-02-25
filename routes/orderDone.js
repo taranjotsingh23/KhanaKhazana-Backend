@@ -2,10 +2,10 @@ const router = require("express").Router();
 const file = require("../model/file");
 
 router.post("/orderDone", async (req, res) => {
-   let resId=req.body.resId;
+   let orderId=req.body.orderId;
 
    const updated_Order = await file.findOneAndUpdate(
-    { resId: resId },
+    { _id: orderId },
     { orderStatus: "Completed" }
    );
 
