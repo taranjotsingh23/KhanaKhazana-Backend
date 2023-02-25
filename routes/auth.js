@@ -7,10 +7,10 @@ const jwt = require("jsonwebtoken");
 
 // const {readFileSync, promises: fsPromises} = require('fs');
 
-const cors = require("cors");
-router.use(cors({
-  'Access-Control-Allow-Origin':'*'
-}));
+// const cors = require("cors");
+// router.use(cors({
+//   'Access-Control-Allow-Origin':'*'
+// }));
 
 const {
   registerValidation,

@@ -14,6 +14,7 @@ const ngoDetailsRoute=require('./routes/ngoDetails');
 const orderDoneRoute=require('./routes/orderDone');
 const downloadRoute=require('./routes/download');
 const postRoute=require('./routes/posts');
+const cors = require("cors");
 dotenv.config();
 
 //Connect to DB
@@ -27,6 +28,12 @@ catch (error) {
 
 //MIDDLEWARES
 app.use(express.json());
+
+var corsOptions = {
+  origin: "http://localhost:3000"
+};
+
+app.use(cors(corsOptions));
 
 // ROUTE MIDDLESWARES
 app.use('/api/user',authRoute);
