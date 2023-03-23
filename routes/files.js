@@ -3,58 +3,79 @@ const multer = require('multer')
 const path = require('path')
 const File = require('../model/file')
 const { v4: uuid4 } = require('uuid');
+const firebase = require("firebase/app");
+const admin = require("firebase-admin");
+const credentials =require("../key.json");
 
-// initialize
-let storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, 'uploads/'),
-    filename: (req, file, cb) => {
-        // Unique generate names
-        const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-        cb(null, uniqueName);
-    }
-})
+admin.initializeApp({
+    credential:admin.credential.cert(credentials)
+});
+const db=admin.firestore();
 
+const { getStorage, ref, uploadBytes, getDownloadURL } = require("firebase/storage");
 
-let upload = multer({
-    storage,
-    limit: { fileSize: 1000000 * 100 },
-}).single('myFile')
-// fieldName is important key
+const firebaseConfig = {
+  apiKey: "AIzaSyAJD3HvTIiQ9s4fVbsJPbT9WTG_jTKOXo8",
+  authDomain: "khana-khazana-a930d.firebaseapp.com",
+  projectId: "khana-khazana-a930d",
+  storageBucket: "khana-khazana-a930d.appspot.com",
+  messagingSenderId: "345512418472",
+  appId: "1:345512418472:web:ba922364b966fefe9ef69d"
+};
 
+firebase.initializeApp(firebaseConfig);
 
-router.post('/files', (req, res) => {
+const storage = getStorage();
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.post('/files', upload.single("myFile"), async (req, res) => {
+    const storageRef = ref(storage, `files/${req.file.originalname}`);
+    const orderId=uuid4();
+    const resId=req.body.resId;
+
     //Forming Current Date
     const date = new Date();
     let day = date.getDate();
     let month = date.getMonth() + 1;
     let year = date.getFullYear();
 
-    // This arrangement can be altered based on how we want the date's format to appear.
     let currentDate = `${day}-${month}-${year}`;
     // console.log(currentDate); // "17-6-2022"
+  
+    const snap=await uploadBytes(storageRef, req.file.buffer).then((snapshot) => {
+      console.log("file uploaded");
+      getDownloadURL(ref(storage, `files/${req.file.originalname}`)).then((url)=> {
+        console.log("URL: "+url);
 
-    //Store file
-    upload(req, res, async (err) => {
-        //Validate request
-        if (!req.file)
-            return res.json({ error: "All fields are required." })
-        if (err) return res.status(500).send({ error: err.message })
-        // Store into Database
-        const file = new File({
-            resId: req.body.resId,
-            filename: req.file.filename,
-            uuid: uuid4(),
-            path: req.file.path,
-            size: req.file.size,
-            foodQuantity: req.body.foodQuantity,
-            foodType: req.body.foodType,
-            orderStatus: "Pending",
-            currDate: currentDate,
-        })
-        const response = await file.save();
-        return res.json({ file: `${process.env.APP_BASE_URL}/files/download/${response.uuid}` });
+        try{
+          const userJson={
+              orderId: orderId,
+              resId: resId,
+              foodImgURL: url
+          };
+          const response=db.collection("users").doc(orderId).set(userJson);
+          console.log(userJson);
+      } catch(error) {
+          console.log(error);
+      }
+    
+      });
+    });
+  
+    console.log(req.file);
+
+    const file = new File({
+        orderId: orderId,
+        resId: resId,
+        foodQuantity: req.body.foodQuantity,
+        foodType: req.body.foodType,
+        orderStatus: "Pending",
+        currDate: currentDate,
     })
-    //response -> link
-})
+    const response = await file.save();
+
+    res.status(200).send({ resCode: 200, message: "File,User Uploaded Successfully" });
+
+});
 
 module.exports = router;

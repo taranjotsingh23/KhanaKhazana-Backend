@@ -1,10 +1,12 @@
 const router = require("express").Router();
 const file = require("../model/file");
 const resUser = require("../model/resUser");
+const admin = require("firebase-admin");
 
 router.post("/findRes", async (req, res) => {
     var area=req.body.area;
 
+    const db=admin.firestore();
     const dbFinding = await resUser.find({ resArea: area });
     let arr=[];
     for(let i=0;i<dbFinding.length;i++)
@@ -31,7 +33,22 @@ router.post("/findRes", async (req, res) => {
             k.resAddress=resDeepInfoFinding.resAddress;
             k.resArea=resDeepInfoFinding.resArea;
             k.stars=resDeepInfoFinding.stars;
-            k.fileLink= `${process.env.APP_BASE_URL}/files/download/${k.uuid}`;
+
+            const snapshot=await db.collection("users").get();
+            const list=snapshot.docs.map((doc)=>doc.data());
+          
+            let barr=[];
+            for(let i=0;i<list.length;i++)
+            {
+                if(list[i].orderId == found.orderId)
+                {
+                    barr.push(list[i]);
+                }
+            }
+
+            console.log(barr);
+
+            k.fileLink= barr[0].foodImgURL;
             delete k._id; 
             delete k.createdAt;
             delete k.updatedAt;
