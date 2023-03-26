@@ -14,6 +14,7 @@ const resOrdersRoute=require('./routes/resOrders');
 const ngoDetailsRoute=require('./routes/ngoDetails');
 const orderDoneRoute=require('./routes/orderDone');
 const downloadRoute=require('./routes/download');
+const sendRevertRoute=require('./routes/sendRevert');
 const postRoute=require('./routes/posts');
 const cors = require("cors");
 dotenv.config();
@@ -46,6 +47,7 @@ app.use('/api/res',resOrdersRoute);
 app.use('/api/ngo',ngoDetailsRoute);
 app.use('/api/res',orderDoneRoute);
 app.use('/files/download',downloadRoute);
+app.use('/api/ngo',sendRevertRoute);
 app.use('/api/posts',postRoute);
 
 app.listen(port,() => {
