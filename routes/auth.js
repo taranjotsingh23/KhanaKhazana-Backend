@@ -120,7 +120,7 @@ router.post("/signup", async (req, res) => {
         userType: userType
       });
   }
-  else
+  else if(userType=="Res")
   {
     //Checking if the user is already in the database
     const emailExist = await resUser.findOne({ resEmail: req.body.email });
@@ -188,118 +188,199 @@ router.post("/signup", async (req, res) => {
         });
   }
 
+  else
+  {
+    //Checking if the user is already in the database
+    const emailExist = await publicUser.findOne({ publicEmail: req.body.email });
+    if(emailExist) {
+      return res
+        .status(400)
+        .send({
+          resCode: 400,
+          message: "Email already exists",
+          name: "",
+          email: "",
+          userType: userType
+        });
+    }
+  
+    if(emailExist) {
+      isEmailinDb=true;
+    }
+
+    //Hash passwords
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+  
+    //Create a new user
+    const user = new publicUser({
+      publicId: "Null",
+      publicName: req.body.name,
+      publicEmail: req.body.email,
+      publicMobileNumber: req.body.mobileNumber,
+      publicAddress: req.body.address,
+      publicArea: req.body.area,
+      password: hashedPassword,
+      authToken: "No Token",
+    });
+  
+    if(isEmailinDb==false) {
+      var savedUser = await user.save();
+      var dbObject = await publicUser.findOne({ publicEmail: req.body.email });
+      var newuserId=dbObject._id.toString();
+      var publicId=newuserId.substring(0,24);
+      var dbResponse=await db.collection("publicusers").updateOne(
+        { publicEmail: req.body.email },
+        { $set: { publicId: publicId } }
+      );
+    }
+
+      var collection = db.collection("publicusers");
+      var email = req.body.email;
+
+      //Create and assign a token
+      const token = jwt.sign({ _id: publicUser._id }, process.env.TOKEN_SECRET);
+      res.header("auth-token", token);
+      collection.updateOne({ publicEmail: email }, { $set: { authToken: token } });
+      var dbObject = await publicUser.findOne({ publicEmail: email });
+      var newuserId=dbObject._id.toString();
+      var publicId=newuserId.substring(0,24);
+      res
+        .status(200)
+        .send({
+          resCode: 200,
+          message: "User Successfully Registered",
+          authToken: token,
+          userId: resId,
+          userType: userType
+        });
+  }
+
 });
 
 
 //Login
-router.post("/login", async (req, res) => {
-  //Lets validate the data before we make a user
-  const { error } = loginValidation(req.body);
-  if (error)
-    return res
-      .status(400)
-      .send({
-        resCode: 400,
-        message: error.details[0].message,
-        name: "",
-        email: "",
-        authToken: "",
-        userId: ""
-      });
+// router.post("/login", async (req, res) => {
+//   //Lets validate the data before we make a user
+//   const { error } = loginValidation(req.body);
+//   if (error)
+//     return res
+//       .status(400)
+//       .send({
+//         resCode: 400,
+//         message: error.details[0].message,
+//         name: "",
+//         email: "",
+//         authToken: "",
+//         userId: ""
+//       });
 
-      //Checking if the email exists
-      const NGOuser = await ngoUser.findOne({ ngoEmail: req.body.email });
-      const RESuser = await resUser.findOne({ resEmail: req.body.email });
-      let isRes=false;
-      let isNgo=true;
-      if (!NGOuser)
-      {
-        if(!RESuser)
-        {
-          return res
-          .status(400)
-          .send({
-            resCode: 400,
-            message: "Email not found",
-            name: "",
-            email: "",
-            authToken: "",
-            userId: "",
-            userType: ""
-          });
-        }
-        isRes=true;
-        isNgo=false;
-      }
+//       //Checking if the email exists
+//       const NGOuser = await ngoUser.findOne({ ngoEmail: req.body.email });
+//       const RESuser = await resUser.findOne({ resEmail: req.body.email });
+//       const PUBLICuser = await publicUser.findOne({ publicEmail: req.body.email });
+//       let isRes=false;
+//       let isNgo=true;
+//       if(!NGOuser)
+//       {
+//         if(!RESuser)
+//         {
+//           if(!PUBLICuser)
+//           {
+//             return res
+//             .status(400)
+//             .send({
+//               resCode: 400,
+//               message: "Email not found",
+//               name: "",
+//               email: "",
+//               authToken: "",
+//               userId: "",
+//               userType: ""
+//             });
+//           }
+//         }
+//       }
+
+//       if(!NGOuser)
+//       {
+//         isNgo=false;
+//       }
+//       else
+//       {
+//         isNgo=true;
+//       }
+//       if(!RESuser)
+//       {
       
-      var user;
-      if(isNgo==true)
-      {
-        user=NGOuser;
-      }
-      else
-      {
-        user=RESuser;
-      }
+//       var user;
+//       if(isNgo==true)
+//       {
+//         user=NGOuser;
+//       }
+//       else
+//       {
+//         user=RESuser;
+//       }
 
-      //Password is correct
-      var validPass = await bcrypt.compare(req.body.password, user.password);
-      if (!validPass)
-        return res
-          .status(400)
-          .send({
-            resCode: 400,
-            message: "Invalid Password",
-            name: "",
-            email: "",
-            authToken: "",
-            userId: "",
-            userType: ""
-          });
+//       //Password is correct
+//       var validPass = await bcrypt.compare(req.body.password, user.password);
+//       if (!validPass)
+//         return res
+//           .status(400)
+//           .send({
+//             resCode: 400,
+//             message: "Invalid Password",
+//             name: "",
+//             email: "",
+//             authToken: "",
+//             userId: "",
+//             userType: ""
+//           });
 
-      if(isNgo==true)
-      {
-        var dbObject = await ngoUser.findOne({ ngoEmail: req.body.email });
-        var newuserId=dbObject._id.toString();
-        var ngoId=newuserId.substring(0,24);
+//       if(isNgo==true)
+//       {
+//         var dbObject = await ngoUser.findOne({ ngoEmail: req.body.email });
+//         var newuserId=dbObject._id.toString();
+//         var ngoId=newuserId.substring(0,24);
 
-        ngoUser.find({ ngoEmail: req.body.email }, function (err, val) {
-          const token = val[0].authToken;
-          return res
-            .status(200)
-            .send({
-              resCode: 200,
-              message: "Logged in!",
-              name: user.ngoName,
-              email: user.ngoEmail,
-              authToken: token,
-              userId: ngoId,
-              userType: "NGO"
-            });
-        });
-      }
-      else
-      {
-        var dbObject = await resUser.findOne({ resEmail: req.body.email });
-        var newuserId=dbObject._id.toString();
-        var resId=newuserId.substring(0,24);
+//         ngoUser.find({ ngoEmail: req.body.email }, function (err, val) {
+//           const token = val[0].authToken;
+//           return res
+//             .status(200)
+//             .send({
+//               resCode: 200,
+//               message: "Logged in!",
+//               name: user.ngoName,
+//               email: user.ngoEmail,
+//               authToken: token,
+//               userId: ngoId,
+//               userType: "NGO"
+//             });
+//         });
+//       }
+//       else
+//       {
+//         var dbObject = await resUser.findOne({ resEmail: req.body.email });
+//         var newuserId=dbObject._id.toString();
+//         var resId=newuserId.substring(0,24);
 
-        resUser.find({ resEmail: req.body.email }, function (err, val) {
-          const token = val[0].authToken;
-          return res
-            .status(200)
-            .send({
-              resCode: 200,
-              message: "Logged in!",
-              name: user.resName,
-              email: user.resEmail,
-              authToken: token,
-              userId: resId,
-              userType: "Res"
-            });
-        });
-      }
-});
+//         resUser.find({ resEmail: req.body.email }, function (err, val) {
+//           const token = val[0].authToken;
+//           return res
+//             .status(200)
+//             .send({
+//               resCode: 200,
+//               message: "Logged in!",
+//               name: user.resName,
+//               email: user.resEmail,
+//               authToken: token,
+//               userId: resId,
+//               userType: "Res"
+//             });
+//         });
+//       }
+// });
 
 
 
