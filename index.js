@@ -38,7 +38,7 @@ catch (error) {
 app.use(express.json());
 
 var corsOptions = {
-  origin: ["https://khana-khazana-nine.vercel.app","https://khana-khazana.ayushtyagi14.repl.co"],
+  origin: ["https://khana-khazana-nine.vercel.app","https://khana-khazana.ayushtyagi14.repl.co","http://localhost:3000"],
 };
 
 app.use(cors(corsOptions));
